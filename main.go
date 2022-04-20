@@ -18,7 +18,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	redis "github.com/go-redis/redis/v8"
 	"github.com/hejiangda/ginstudy-recipes-api/handlers"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -39,7 +41,16 @@ func init() {
 	}
 	collection := client.Database(os.Getenv("MONGO_DATABASE")).Collection("recipes")
 
-	recipesHandler = handlers.NewRecipesHandler(ctx, collection)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     "redis-12568.c299.asia-northeast1-1.gce.cloud.redislabs.com:12568",
+		Username: "ginstudy",
+		Password: "vBTk@CJvHtrNU7V",
+		DB:       0,
+	})
+	status := redisClient.Ping(ctx)
+	fmt.Println(status)
+	recipesHandler = handlers.NewRecipesHandler(ctx, collection, redisClient)
+
 }
 
 func main() {
